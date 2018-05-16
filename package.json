@@ -1,0 +1,27 @@
+{
+  "name": "bonding-curves",
+  "version": "0.0.1",
+  "description": "Bonding curves for ethereum tokens",
+  "main": "truffle.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "compile": "./node_modules/.bin/truffle compile",
+    "_deploy": "./node_modules/.bin/truffle migrate --network ",
+    "deploy-mainnet": "npm run _deploy mainnet",
+    "deploy-infuranet": "npm run _deploy infuranet",
+    "deploy-ropsten": "npm run _deploy ropsten",
+    "deploy-rinkeby": "npm run _deploy rinkeby",
+    "deploy-kovan": "npm run _deploy kovan",
+    "deploy-local": "npm run _deploy local",
+    "test": "./node_modules/.bin/truffle test"
+  },
+  "license": "Apache-2",
+  "devDependencies": {
+    "ganache-cli": "^6.1.0",
+    "truffle": "^4.1.8",
+    "truffle-hdwallet-provider": "0.0.5"
+  },
+  "dependencies": {}
+}
