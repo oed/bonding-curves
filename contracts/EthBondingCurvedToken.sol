@@ -3,21 +3,17 @@ import "tokens/eip20/EIP20.sol";
 import "zeppelin/contracts/math/SafeMath.sol";
 
 
-contract BondingCurvedToken is EIP20 {
+contract EthBondingCurvedToken is EIP20 {
 
     using SafeMath for uint256;
 
-    EIP20 public reserveToken;
     uint256 public poolBalance;
 
     constructor(
         string name,
         uint8 decimals,
-        string symbol,
-        address _reserveToken
-    ) EIP20(0, name, decimals, symbol) public {
-        reserveToken = EIP20(_reserveToken);
-    }
+        string symbol
+    ) EIP20(0, name, decimals, symbol) public {}
 
     function priceToMint(uint256 numTokens) public returns(uint256);
 
@@ -25,11 +21,14 @@ contract BondingCurvedToken is EIP20 {
 
     function mint(uint256 numTokens) public payable {
         uint256 priceForTokens = priceToMint(numTokens);
-        require(reserveToken.transferFrom(msg.sender, this, priceForTokens));
+        require(msg.value >= priceForTokens);
 
         totalSupply = totalSupply.add(numTokens);
         balances[msg.sender] = balances[msg.sender].add(numTokens);
-        poolBalance = poolBalance.add(priceForTokens);
+        poolBalance = poolBalance.add(msg.value);
+        if (msg.value > priceForTokens) {
+            msg.sender.transfer(msg.value - priceForTokens);
+        }
 
         emit Minted(numTokens, priceForTokens);
     }
@@ -37,13 +36,13 @@ contract BondingCurvedToken is EIP20 {
     function burn(uint256 numTokens) public {
         require(balances[msg.sender] >= numTokens);
 
-        uint256 reserveTokensToReturn = rewardForBurn(numTokens);
+        uint256 ethToReturn = rewardForBurn(numTokens);
         totalSupply = totalSupply.sub(numTokens);
         balances[msg.sender] = balances[msg.sender].sub(numTokens);
-        poolBalance = poolBalance.sub(reserveTokensToReturn);
-        reserveToken.transfer(msg.sender, reserveTokensToReturn);
+        poolBalance = poolBalance.sub(ethToReturn);
+        msg.sender.transfer(ethToReturn);
 
-        emit Burned(numTokens, reserveTokensToReturn);
+        emit Burned(numTokens, ethToReturn);
     }
 
     event Minted(uint256 amount, uint256 totalCost);

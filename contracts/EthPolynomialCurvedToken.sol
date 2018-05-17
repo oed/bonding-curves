@@ -1,9 +1,9 @@
 /*pragma solidity ^0.4.23*/
 
-import "./BondingCurvedToken.sol";
+import "./EthBondingCurvedToken.sol";
 
 
-contract PolynomialCurvedToken is BondingCurvedToken {
+contract EthPolynomialCurvedToken is EthBondingCurvedToken {
 
     uint256 constant private PRECISION = 10000000000;
 
@@ -13,9 +13,8 @@ contract PolynomialCurvedToken is BondingCurvedToken {
         string name,
         uint8 decimals,
         string symbol,
-        address reserveToken,
         uint8 _exponent
-    ) BondingCurvedToken(name, decimals, symbol, reserveToken) public {
+    ) EthBondingCurvedToken(name, decimals, symbol) public {
         exponent = _exponent;
     }
 
