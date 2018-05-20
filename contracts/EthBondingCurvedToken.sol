@@ -25,7 +25,7 @@ contract EthBondingCurvedToken is EIP20 {
 
         totalSupply = totalSupply.add(numTokens);
         balances[msg.sender] = balances[msg.sender].add(numTokens);
-        poolBalance = poolBalance.add(msg.value);
+        poolBalance = poolBalance.add(priceForTokens);
         if (msg.value > priceForTokens) {
             msg.sender.transfer(msg.value - priceForTokens);
         }
