@@ -23,7 +23,7 @@ contract BondingCurvedToken is EIP20 {
 
     function rewardForBurn(uint256 numTokens) public returns(uint256);
 
-    function mint(uint256 numTokens) public payable {
+    function mint(uint256 numTokens) public {
         uint256 priceForTokens = priceToMint(numTokens);
         require(reserveToken.transferFrom(msg.sender, this, priceForTokens));
 
