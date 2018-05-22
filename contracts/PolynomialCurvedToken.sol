@@ -3,12 +3,20 @@
 import "./BondingCurvedToken.sol";
 
 
+/// @title  PolynomialCurvedToken - A polynomial bonding curve
+///         implementation that is backed by an EIP20 token.
 contract PolynomialCurvedToken is BondingCurvedToken {
 
     uint256 constant private PRECISION = 10000000000;
 
     uint8 public exponent;
 
+    /// @dev constructor        Initializes the bonding curve
+    /// @param name             The name of the token
+    /// @param decimals         The number of decimals to use
+    /// @param symbol           The symbol of the token
+    /// @param _reserveToken    The backing token to use
+    /// @param _exponent        The exponent of the curve
     constructor(
         string name,
         uint8 decimals,
@@ -19,6 +27,8 @@ contract PolynomialCurvedToken is BondingCurvedToken {
         exponent = _exponent;
     }
 
+    /// @dev        Calculate the integral from 0 to t
+    /// @param t    The number to integrate to
     function curveIntegral(uint256 t) internal returns (uint256) {
         uint256 nexp = exponent + 1;
         // Calculate integral of t^exponent

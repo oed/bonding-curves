@@ -56,8 +56,9 @@ contract('PolynomialCurvedToken', accounts => {
     assert.equal(balance.toNumber(), 0)
 
     const priceToMint1 = await polyBondToken1.priceToMint.call(50)
-    backingToken.approve(polyBondToken1.address, priceToMint1, {from: user1})
+    let tx0 = await backingToken.approve(polyBondToken1.address, priceToMint1, {from: user1})
     let tx = await polyBondToken1.mint(50, {from: user1})
+    console.log(tx0.receipt.gasUsed, tx.receipt.gasUsed)
     assert.equal(tx.logs[1].args.amount.toNumber(), 50, 'amount minted should be 50')
     balance = await polyBondToken1.balanceOf(user1)
     assert.equal(tx.logs[1].args.totalCost.toNumber(), priceToMint1)
@@ -66,8 +67,9 @@ contract('PolynomialCurvedToken', accounts => {
 
     const priceToMint2 = await polyBondToken1.priceToMint.call(50)
     assert.isAbove(priceToMint2.toNumber(), priceToMint1)
-    backingToken.approve(polyBondToken1.address, priceToMint2, {from: user2})
+    tx0 = await backingToken.approve(polyBondToken1.address, priceToMint2, {from: user2})
     tx = await polyBondToken1.mint(50, {from: user2})
+    console.log(tx0.receipt.gasUsed, tx.receipt.gasUsed)
     assert.equal(tx.logs[1].args.amount.toNumber(), 50, 'amount minted should be 50')
     assert.equal(tx.logs[1].args.totalCost.toNumber(), priceToMint2)
     const poolBalance2 = await polyBondToken1.poolBalance.call()
@@ -79,7 +81,7 @@ contract('PolynomialCurvedToken', accounts => {
     let didThrow = false
     const priceToMint3 = await polyBondToken1.priceToMint.call(50)
     try {
-      backingToken.approve(polyBondToken1.address, priceToMint3.toNumber() - 1, {from: user2})
+      await backingToken.approve(polyBondToken1.address, priceToMint3.toNumber() - 1, {from: user2})
       tx = await polyBondToken1.mint(50, {from: user2})
     } catch (e) {
       didThrow = true
