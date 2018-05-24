@@ -34,10 +34,10 @@ contract EthPolynomialCurvedToken is EthBondingCurvedToken {
     }
 
     function priceToMint(uint256 numTokens) public returns(uint256) {
-        return curveIntegral(totalSupply + numTokens) - poolBalance;
+        return curveIntegral(totalSupply.add(numTokens)).sub(poolBalance);
     }
 
     function rewardForBurn(uint256 numTokens) public returns(uint256) {
-        return poolBalance - curveIntegral(totalSupply - numTokens);
+        return poolBalance.sub(curveIntegral(totalSupply.sub(numTokens)));
     }
 }

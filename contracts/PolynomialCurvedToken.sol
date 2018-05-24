@@ -15,7 +15,7 @@ contract PolynomialCurvedToken is BondingCurvedToken {
     /// @param name             The name of the token
     /// @param decimals         The number of decimals to use
     /// @param symbol           The symbol of the token
-    /// @param _reserveToken    The backing token to use
+    /// @param reserveToken    The backing token to use
     /// @param _exponent        The exponent of the curve
     constructor(
         string name,
@@ -36,10 +36,10 @@ contract PolynomialCurvedToken is BondingCurvedToken {
     }
 
     function priceToMint(uint256 numTokens) public returns(uint256) {
-        return curveIntegral(totalSupply + numTokens) - poolBalance;
+        return curveIntegral(totalSupply.add(numTokens)).sub(poolBalance);
     }
 
     function rewardForBurn(uint256 numTokens) public returns(uint256) {
-        return poolBalance - curveIntegral(totalSupply - numTokens);
+        return poolBalance.sub(curveIntegral(totalSupply.sub(numTokens)));
     }
 }
