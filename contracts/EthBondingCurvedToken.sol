@@ -1,11 +1,12 @@
+pragma solidity ^0.4.23;
 
-import "tokens/eip20/EIP20.sol";
-import "zeppelin/contracts/math/SafeMath.sol";
-
+import "openzeppelin-solidity/contracts/token/ERC20/DetailedERC20.sol";
+import "openzeppelin-solidity/contracts/token/ERC20/StandardToken.sol";
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 /// @title  EthBondingCurvedToken - A bonding curve
 ///         implementation that is backed by ether.
-contract EthBondingCurvedToken is EIP20 {
+contract EthBondingCurvedToken is DetailedERC20, StandardToken {
 
     event Minted(uint256 amount, uint256 totalCost);
     event Burned(uint256 amount, uint256 reward);
@@ -20,9 +21,9 @@ contract EthBondingCurvedToken is EIP20 {
     /// @param symbol       The symbol of the token
     constructor(
         string name,
-        uint8 decimals,
-        string symbol
-    ) EIP20(0, name, decimals, symbol) public {}
+        string symbol,
+        uint8 decimals
+    ) DetailedERC20(name, symbol, decimals) public {}
 
     /// @dev                Get the price in ether to mint tokens
     /// @param numTokens    The number of tokens to calculate price for
@@ -38,7 +39,7 @@ contract EthBondingCurvedToken is EIP20 {
         uint256 priceForTokens = priceToMint(numTokens);
         require(msg.value >= priceForTokens);
 
-        totalSupply = totalSupply.add(numTokens);
+        totalSupply_ = totalSupply_.add(numTokens);
         balances[msg.sender] = balances[msg.sender].add(numTokens);
         poolBalance = poolBalance.add(priceForTokens);
         if (msg.value > priceForTokens) {
@@ -54,7 +55,7 @@ contract EthBondingCurvedToken is EIP20 {
         require(balances[msg.sender] >= numTokens);
 
         uint256 ethToReturn = rewardForBurn(numTokens);
-        totalSupply = totalSupply.sub(numTokens);
+        totalSupply_ = totalSupply_.sub(numTokens);
         balances[msg.sender] = balances[msg.sender].sub(numTokens);
         poolBalance = poolBalance.sub(ethToReturn);
         msg.sender.transfer(ethToReturn);

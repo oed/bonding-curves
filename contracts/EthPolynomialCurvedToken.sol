@@ -1,7 +1,6 @@
-/*pragma solidity ^0.4.23*/
+pragma solidity ^0.4.23;
 
 import "./EthBondingCurvedToken.sol";
-
 
 /// @title  EthPolynomialCurvedToken - A polynomial bonding curve
 ///         implementation that is backed by ether.
@@ -18,10 +17,10 @@ contract EthPolynomialCurvedToken is EthBondingCurvedToken {
     /// @param _exponent        The exponent of the curve
     constructor(
         string name,
-        uint8 decimals,
         string symbol,
+        uint8 decimals,
         uint8 _exponent
-    ) EthBondingCurvedToken(name, decimals, symbol) public {
+    ) EthBondingCurvedToken(name, symbol, decimals) public {
         exponent = _exponent;
     }
 
@@ -34,10 +33,10 @@ contract EthPolynomialCurvedToken is EthBondingCurvedToken {
     }
 
     function priceToMint(uint256 numTokens) public returns(uint256) {
-        return curveIntegral(totalSupply.add(numTokens)).sub(poolBalance);
+        return curveIntegral(totalSupply_.add(numTokens)).sub(poolBalance);
     }
 
     function rewardForBurn(uint256 numTokens) public returns(uint256) {
-        return poolBalance.sub(curveIntegral(totalSupply.sub(numTokens)));
+        return poolBalance.sub(curveIntegral(totalSupply_.sub(numTokens)));
     }
 }
