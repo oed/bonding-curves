@@ -11,7 +11,10 @@ contract("EthPolynomialCurvedToken", accounts => {
       "oed curve",
       "OCU",
       18,
-      2
+      2,
+      1,
+      1,
+      1
     );
   });
 
@@ -20,8 +23,14 @@ contract("EthPolynomialCurvedToken", accounts => {
     assert.equal(poolBalance, 0);
     const totalSupply = await polyBondToken1.totalSupply.call();
     assert.equal(totalSupply, 0);
-    const exponent = await polyBondToken1.exponent.call();
-    assert.equal(exponent, 2);
+    const baseN = await polyBondToken1.baseN.call();
+    assert.equal(baseN, 2);
+    const baseD = await polyBondToken1.baseD.call();
+    assert.equal(baseD, 1);
+    const expN = await polyBondToken1.expN.call();
+    assert.equal(expN, 1);
+    const expD = await polyBondToken1.expD.call();
+    assert.equal(expD, 1);
   });
 
   describe("Curve integral calulations", async () => {
@@ -32,7 +41,10 @@ contract("EthPolynomialCurvedToken", accounts => {
         "oed curve",
         "OCU",
         18,
-        exponent
+        exponent,
+        1,
+        1,
+        1
       );
       let res;
       let jsres;
