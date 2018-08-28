@@ -43,22 +43,22 @@ contract("PolynomialCurvedToken", accounts => {
   describe("Curve integral calulations", async () => {
     // priceToMint is the same as the internal function curveIntegral if
     // totalSupply and poolBalance is zero
-    const testWithExponent = async exponent => {
+    const testWithExponent = async (expN, expD = 1) => {
       const tmpPolyToken = await PolynomialCurvedToken.new(
         "oed curve",
         "OCU",
         18,
         backingToken.address,
-        exponent,
         1,
         1,
-        1
+        expN,
+        expD
       );
       let res;
       let jsres;
       let last = 0;
       for (let i = 50000; i < 5000000; i += 50000) {
-        res = (await polyBondToken1.priceToMint.call(i)).toNumber();
+        res = (await tmpPolyToken.priceToMint.call(i)).toNumber();
         assert.isAbove(
           res,
           last,
@@ -76,8 +76,8 @@ contract("PolynomialCurvedToken", accounts => {
     it("works with exponent = 3", async () => {
       await testWithExponent(3);
     });
-    it("works with exponent = 4", async () => {
-      await testWithExponent(4);
+    it("works with exponent = 1/2", async () => {
+      await testWithExponent(1, 2);
     });
   });
 

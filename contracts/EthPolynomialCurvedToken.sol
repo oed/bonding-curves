@@ -14,8 +14,8 @@ contract EthPolynomialCurvedToken is EthBondingCurvedToken, Power {
 
     /// @dev constructor        Initializes the bonding curve
     /// @param _name            The name of the token
-    /// @param _decimals        The number of decimals to use
     /// @param _symbol          The symbol of the token
+    /// @param _decimals        The number of decimals to use
     /// @param _baseN           The base numerator of the curve
     /// @param _baseD           The base denominator of the curve
     /// @param _expN            The exponent numerator of the curve
@@ -35,14 +35,14 @@ contract EthPolynomialCurvedToken is EthBondingCurvedToken, Power {
         expD = _expD;
     }
 
-    /// @dev        Calculate the integral from 0 to t
+    /// @dev        Calculate the integral from 0 to x
     /// @param x    The number to integrate to
     function curveIntegral(uint256 x) internal returns (uint256) {
         uint32 nExpN = expN + expD;
         uint256 result;
         uint8 precision;
 
-        // Calculate integral of t^exponent
+        // Calculate integral of x^exponent
         (result, precision) = power(x.mul(expD), baseD.mul(nExpN), nExpN, expD);
         return result >> precision;
     }
