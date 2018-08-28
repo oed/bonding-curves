@@ -11,14 +11,17 @@ contract("PolynomialCurvedToken", accounts => {
     backingToken = await TestToken.new("stable coin", "STB", 18, {
       from: user1
     });
-    await backingToken.mint(user1, 500000, { from: user1 });
-    await backingToken.mint(user2, 500000, { from: user1 });
+    await backingToken.mint(user1, 500000000000, { from: user1 });
+    await backingToken.mint(user2, 500000000000, { from: user1 });
     polyBondToken1 = await PolynomialCurvedToken.new(
       "oed curve",
       "OCU",
       18,
       backingToken.address,
-      2
+      2,
+      1,
+      1,
+      1
     );
   });
 
@@ -27,26 +30,35 @@ contract("PolynomialCurvedToken", accounts => {
     assert.equal(poolBalance, 0);
     const totalSupply = await polyBondToken1.totalSupply.call();
     assert.equal(totalSupply, 0);
-    const exponent = await polyBondToken1.exponent.call();
-    assert.equal(exponent, 2);
+    const baseN = await polyBondToken1.baseN.call();
+    assert.equal(baseN, 2);
+    const baseD = await polyBondToken1.baseD.call();
+    assert.equal(baseD, 1);
+    const expN = await polyBondToken1.expN.call();
+    assert.equal(expN, 1);
+    const expD = await polyBondToken1.expD.call();
+    assert.equal(expD, 1);
   });
 
   describe("Curve integral calulations", async () => {
     // priceToMint is the same as the internal function curveIntegral if
     // totalSupply and poolBalance is zero
-    const testWithExponent = async exponent => {
+    const testWithExponent = async (expN, expD = 1) => {
       const tmpPolyToken = await PolynomialCurvedToken.new(
         "oed curve",
         "OCU",
         18,
         backingToken.address,
-        exponent
+        1,
+        1,
+        expN,
+        expD
       );
       let res;
       let jsres;
       let last = 0;
       for (let i = 50000; i < 5000000; i += 50000) {
-        res = (await polyBondToken1.priceToMint.call(i)).toNumber();
+        res = (await tmpPolyToken.priceToMint.call(i)).toNumber();
         assert.isAbove(
           res,
           last,
@@ -64,8 +76,8 @@ contract("PolynomialCurvedToken", accounts => {
     it("works with exponent = 3", async () => {
       await testWithExponent(3);
     });
-    it("works with exponent = 4", async () => {
-      await testWithExponent(4);
+    it("works with exponent = 1/2", async () => {
+      await testWithExponent(1, 2);
     });
   });
 
@@ -87,7 +99,7 @@ contract("PolynomialCurvedToken", accounts => {
       "amount minted should be 50"
     );
     balance = await polyBondToken1.balanceOf(user1);
-    assert.equal(tx.logs[1].args.totalCost.toNumber(), priceToMint1);
+    assert.equal(tx.logs[1].args.totalCost.toNumber(), priceToMint1.toNumber());
     const poolBalance1 = await polyBondToken1.poolBalance.call();
     assert.equal(
       poolBalance1.toNumber(),
@@ -100,6 +112,7 @@ contract("PolynomialCurvedToken", accounts => {
     tx0 = await backingToken.approve(polyBondToken1.address, priceToMint2, {
       from: user2
     });
+
     tx = await polyBondToken1.mint(50, { from: user2 });
     console.log(tx0.receipt.gasUsed, tx.receipt.gasUsed);
     assert.equal(
@@ -107,7 +120,7 @@ contract("PolynomialCurvedToken", accounts => {
       50,
       "amount minted should be 50"
     );
-    assert.equal(tx.logs[1].args.totalCost.toNumber(), priceToMint2);
+    assert.equal(tx.logs[1].args.totalCost.toNumber(), priceToMint2.toNumber());
     const poolBalance2 = await polyBondToken1.poolBalance.call();
     assert.equal(
       poolBalance2.toNumber(),
