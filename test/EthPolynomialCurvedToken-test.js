@@ -1,10 +1,24 @@
 const EthPolynomialCurvedToken = artifacts.require("EthPolynomialCurvedToken");
 
+
 contract("EthPolynomialCurvedToken", accounts => {
   let polyBondToken1;
   const creator = accounts[0];
   const user1 = accounts[1];
   const user2 = accounts[2];
+
+
+  const getBalance = address => {
+    return new Promise((resolve, reject) => {
+      web3.eth.getBalance(address, (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result);
+        }
+      })
+    })
+  }
 
   before(async () => {
     polyBondToken1 = await EthPolynomialCurvedToken.new(
@@ -67,6 +81,9 @@ contract("EthPolynomialCurvedToken", accounts => {
     let balance = await polyBondToken1.balanceOf(user1);
     assert.equal(balance.toNumber(), 0);
 
+    let contractBalance = await getBalance(polyBondToken1.address);
+    console.log('contract holds: ', contractBalance.toString());
+
     const priceToMint1 = await polyBondToken1.priceToMint.call(50);
     let tx = await polyBondToken1.mint(50, {
       value: priceToMint1,
@@ -82,9 +99,12 @@ contract("EthPolynomialCurvedToken", accounts => {
     const poolBalance1 = await polyBondToken1.poolBalance.call();
     assert.equal(
       poolBalance1.toNumber(),
-      Math.round(priceToMint1.toNumber()*0.9),
+      Math.round(priceToMint1.toNumber() * 0.9),
       "poolBalance should be correct"
     );
+
+    contractBalance = await getBalance(polyBondToken1.address);
+    console.log('contract holds: ', contractBalance.toString(), 'priceToMint1: ', priceToMint1.toString());
 
     const priceToMint2 = await polyBondToken1.priceToMint.call(50);
     assert.isAbove(priceToMint2.toNumber(), priceToMint1.toNumber());
@@ -98,10 +118,12 @@ contract("EthPolynomialCurvedToken", accounts => {
     const poolBalance2 = await polyBondToken1.poolBalance.call();
     assert.equal(
       poolBalance2.toNumber(),
-      299999,
-      // Math.ceil(0.9*(priceToMint1.toNumber() + priceToMint2.toNumber())),
+      Math.round(0.9 * (priceToMint1.toNumber())) + Math.round(0.9 * priceToMint2.toNumber()),
       "poolBalance should be correct"
     );
+
+    contractBalance = await getBalance(polyBondToken1.address);
+    console.log('contract holds: ', contractBalance.toString(), 'priceToMint2: ', priceToMint2.toString());
 
     const totalSupply = await polyBondToken1.totalSupply.call();
     assert.equal(totalSupply.toNumber(), 100);
@@ -134,7 +156,10 @@ contract("EthPolynomialCurvedToken", accounts => {
     const poolBalance1 = await polyBondToken1.poolBalance.call();
     const totalSupply1 = await polyBondToken1.totalSupply.call();
 
+    contractBalance = await getBalance(polyBondToken1.address);
+
     let reward1 = await polyBondToken1.rewardForBurn.call(50);
+    console.log('contract holds: ', contractBalance.toString(), 'reward1: ', reward1.toString());
     let tx = await polyBondToken1.burn(50, { from: user1 });
     assert.equal(
       tx.logs[0].args.amount.toNumber(),
@@ -153,7 +178,10 @@ contract("EthPolynomialCurvedToken", accounts => {
     const totalSupply2 = await polyBondToken1.totalSupply.call();
     assert.equal(totalSupply2.toNumber(), totalSupply1.toNumber() - 50);
 
+    contractBalance = await getBalance(polyBondToken1.address);
+
     let reward2 = await polyBondToken1.rewardForBurn.call(50);
+    console.log('contract holds: ', contractBalance.toString(), 'reward2: ', reward2.toString());
     tx = await polyBondToken1.burn(50, { from: user2 });
     assert.equal(
       tx.logs[0].args.amount.toNumber(),
@@ -165,10 +193,31 @@ contract("EthPolynomialCurvedToken", accounts => {
     assert.equal(balance.toNumber(), 0);
     assert.isBelow(reward2.toNumber(), reward1.toNumber());
 
+    contractBalance = await getBalance(polyBondToken1.address);
+    console.log('contract holds: ', contractBalance.toString());
+
     const poolBalance3 = await polyBondToken1.poolBalance.call();
     assert.equal(poolBalance3.toNumber(), 0);
     const totalSupply3 = await polyBondToken1.totalSupply.call();
     assert.equal(totalSupply3.toNumber(), 0);
+  });
+
+
+  it("Can withdraw ether from ownerFund", async function () {
+    contractBalance = await getBalance(polyBondToken1.address);
+    console.log('contract holds: ', contractBalance.toString());
+    let ownerBalancePre;
+    web3.eth.getBalance(creator, (err, res) => {
+      ownerBalancePre = res.toNumber();
+    });
+    tx = await polyBondToken1.withdraw({ from: creator });
+    let ownerBalancePost;
+    web3.eth.getBalance(creator, (err, res) => {
+      ownerBalancePost = res.toNumber();
+    });
+    // assert.isAbove(ownerBalancePost.toNumber(), ownerBalancePre.toNumber())
+    contractBalance = await getBalance(polyBondToken1.address);
+    console.log('contract holds: ', contractBalance.toString());
   });
 
 });
