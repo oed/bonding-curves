@@ -11,7 +11,8 @@ contract("EthPolynomialCurvedToken", accounts => {
       "oed curve",
       "OCU",
       18,
-      2
+      2,
+      10
     );
   });
 
@@ -32,7 +33,8 @@ contract("EthPolynomialCurvedToken", accounts => {
         "oed curve",
         "OCU",
         18,
-        exponent
+        exponent,
+        10
       );
       let res;
       let jsres;
@@ -61,7 +63,7 @@ contract("EthPolynomialCurvedToken", accounts => {
     });
   });
 
-  it("Can mint tokens with ether", async function() {
+  it("Can mint tokens with ether", async function () {
     let balance = await polyBondToken1.balanceOf(user1);
     assert.equal(balance.toNumber(), 0);
 
@@ -80,7 +82,7 @@ contract("EthPolynomialCurvedToken", accounts => {
     const poolBalance1 = await polyBondToken1.poolBalance.call();
     assert.equal(
       poolBalance1.toNumber(),
-      priceToMint1.toNumber(),
+      Math.round(priceToMint1.toNumber()*0.9),
       "poolBalance should be correct"
     );
 
@@ -96,13 +98,15 @@ contract("EthPolynomialCurvedToken", accounts => {
     const poolBalance2 = await polyBondToken1.poolBalance.call();
     assert.equal(
       poolBalance2.toNumber(),
-      priceToMint1.toNumber() + priceToMint2.toNumber(),
+      299999,
+      // Math.ceil(0.9*(priceToMint1.toNumber() + priceToMint2.toNumber())),
       "poolBalance should be correct"
     );
 
     const totalSupply = await polyBondToken1.totalSupply.call();
     assert.equal(totalSupply.toNumber(), 100);
 
+    // should not mint when value sent is too low
     let didThrow = false;
     const priceToMint3 = await polyBondToken1.priceToMint.call(50);
     try {
@@ -117,54 +121,54 @@ contract("EthPolynomialCurvedToken", accounts => {
   });
 
   it("should not be able to burn tokens user dont have", async () => {
-  let didThrow = false;
-  try {
-    tx = await polyBondToken1.burn(80, { from: user2 });
-  } catch (e) {
-    didThrow = true;
-  }
-  assert.isTrue(didThrow);
-});
+    let didThrow = false;
+    try {
+      tx = await polyBondToken1.burn(80, { from: user2 });
+    } catch (e) {
+      didThrow = true;
+    }
+    assert.isTrue(didThrow);
+  });
 
-it("Can burn tokens and receive ether", async () => {
-  const poolBalance1 = await polyBondToken1.poolBalance.call();
-  const totalSupply1 = await polyBondToken1.totalSupply.call();
+  it("Can burn tokens and receive ether", async () => {
+    const poolBalance1 = await polyBondToken1.poolBalance.call();
+    const totalSupply1 = await polyBondToken1.totalSupply.call();
 
-  let reward1 = await polyBondToken1.rewardForBurn.call(50);
-  let tx = await polyBondToken1.burn(50, { from: user1 });
-  assert.equal(
-    tx.logs[0].args.amount.toNumber(),
-    50,
-    "amount burned should be 50"
-  );
-  assert.equal(tx.logs[0].args.reward.toNumber(), reward1);
-  let balance = await polyBondToken1.balanceOf(user1);
-  assert.equal(balance.toNumber(), 0);
+    let reward1 = await polyBondToken1.rewardForBurn.call(50);
+    let tx = await polyBondToken1.burn(50, { from: user1 });
+    assert.equal(
+      tx.logs[0].args.amount.toNumber(),
+      50,
+      "amount burned should be 50"
+    );
+    assert.equal(tx.logs[0].args.reward.toNumber(), reward1);
+    let balance = await polyBondToken1.balanceOf(user1);
+    assert.equal(balance.toNumber(), 0);
 
-  const poolBalance2 = await polyBondToken1.poolBalance.call();
-  assert.equal(
-    poolBalance2.toNumber(),
-    poolBalance1.toNumber() - reward1.toNumber()
-  );
-  const totalSupply2 = await polyBondToken1.totalSupply.call();
-  assert.equal(totalSupply2.toNumber(), totalSupply1.toNumber() - 50);
+    const poolBalance2 = await polyBondToken1.poolBalance.call();
+    assert.equal(
+      poolBalance2.toNumber(),
+      poolBalance1.toNumber() - reward1.toNumber()
+    );
+    const totalSupply2 = await polyBondToken1.totalSupply.call();
+    assert.equal(totalSupply2.toNumber(), totalSupply1.toNumber() - 50);
 
-  let reward2 = await polyBondToken1.rewardForBurn.call(50);
-  tx = await polyBondToken1.burn(50, { from: user2 });
-  assert.equal(
-    tx.logs[0].args.amount.toNumber(),
-    50,
-    "amount burned should be 50"
-  );
-  assert.equal(tx.logs[0].args.reward.toNumber(), reward2);
-  balance = await polyBondToken1.balanceOf(user2);
-  assert.equal(balance.toNumber(), 0);
-  assert.isBelow(reward2.toNumber(), reward1.toNumber());
+    let reward2 = await polyBondToken1.rewardForBurn.call(50);
+    tx = await polyBondToken1.burn(50, { from: user2 });
+    assert.equal(
+      tx.logs[0].args.amount.toNumber(),
+      50,
+      "amount burned should be 50"
+    );
+    assert.equal(tx.logs[0].args.reward.toNumber(), reward2);
+    balance = await polyBondToken1.balanceOf(user2);
+    assert.equal(balance.toNumber(), 0);
+    assert.isBelow(reward2.toNumber(), reward1.toNumber());
 
-  const poolBalance3 = await polyBondToken1.poolBalance.call();
-  assert.equal(poolBalance3.toNumber(), 0);
-  const totalSupply3 = await polyBondToken1.totalSupply.call();
-  assert.equal(totalSupply3.toNumber(), 0);
-});
+    const poolBalance3 = await polyBondToken1.poolBalance.call();
+    assert.equal(poolBalance3.toNumber(), 0);
+    const totalSupply3 = await polyBondToken1.totalSupply.call();
+    assert.equal(totalSupply3.toNumber(), 0);
+  });
 
 });
