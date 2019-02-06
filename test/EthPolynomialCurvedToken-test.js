@@ -28,6 +28,12 @@ contract("EthPolynomialCurvedToken", accounts => {
       2,
       10
     );
+    const hash = polyBondToken1.transactionHash;
+    let receipt;
+    await web3.eth.getTransactionReceipt(hash, (err, res) => {
+      receipt = res;
+      console.log('Gas for deployment: ', receipt.gasUsed)
+    });
   });
 
   it("Is initiated correcly", async () => {
@@ -115,6 +121,9 @@ contract("EthPolynomialCurvedToken", accounts => {
       "amount minted should be 50"
     );
     assert.equal(tx.logs[0].args.totalCost.toNumber(), priceToMint2.toNumber());
+
+    console.log('Gas for buying: ', tx.receipt.gasUsed);
+
     const poolBalance2 = await polyBondToken1.poolBalance.call();
     assert.equal(
       poolBalance2.toNumber(),
@@ -169,6 +178,8 @@ contract("EthPolynomialCurvedToken", accounts => {
     assert.equal(tx.logs[0].args.reward.toNumber(), reward1);
     let balance = await polyBondToken1.balanceOf(user1);
     assert.equal(balance.toNumber(), 0);
+
+    console.log('Gas for selling: ', tx.receipt.gasUsed);
 
     const poolBalance2 = await polyBondToken1.poolBalance.call();
     assert.equal(
