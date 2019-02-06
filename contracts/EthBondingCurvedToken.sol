@@ -84,8 +84,8 @@ contract EthBondingCurvedToken is DetailedERC20, StandardToken {
     function withdraw() public {
         require(ownerFund > 0, "No ether available in ownerFund");
         creator.transfer(ownerFund);
-        ownerFund = 0;
-        
+
         emit Withdrawn(ownerFund);
+        ownerFund = 0;
     }
 }
