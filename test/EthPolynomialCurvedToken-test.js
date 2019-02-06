@@ -222,9 +222,15 @@ contract("EthPolynomialCurvedToken", accounts => {
       ownerBalancePre = res.toNumber();
     });
     tx = await polyBondToken1.withdraw({ from: creator });
+    await web3.eth.getTransaction(tx.tx, (err, res) => {
+      console.log('Gas for withdrawing: ', tx.receipt.gasUsed, 'Gas Price: ', res.gasPrice.toNumber(), 'Gas cost: ', tx.receipt.gasUsed * res.gasPrice.toNumber() );
+    })
     let ownerBalancePost;
     web3.eth.getBalance(creator, (err, res) => {
       ownerBalancePost = res.toNumber();
+      console.log('Post withdraw: ', ownerBalancePost.toString(), 'Pre withdraw: ', ownerBalancePre.toString() )
+      // Somehow the ownerFund is rounded up / after subtracting gasCosts, 
+      // the owner is given a bit more than whats in the ownerFund?!
     });
     // assert.isAbove(ownerBalancePost.toNumber(), ownerBalancePre.toNumber()) // this is not necessarily the case because of gas costs!
     contractBalance = await getBalance(polyBondToken1.address);
