@@ -226,7 +226,7 @@ contract("EthPolynomialCurvedToken", accounts => {
     web3.eth.getBalance(creator, (err, res) => {
       ownerBalancePost = res.toNumber();
     });
-    // assert.isAbove(ownerBalancePost.toNumber(), ownerBalancePre.toNumber())
+    // assert.isAbove(ownerBalancePost.toNumber(), ownerBalancePre.toNumber()) // this is not necessarily the case because of gas costs!
     contractBalance = await getBalance(polyBondToken1.address);
     console.log('contract holds: ', contractBalance.toString());
   });
