@@ -1,3 +1,4 @@
+
 pragma solidity ^0.4.23;
 
 import "openzeppelin-solidity/contracts/token/ERC20/DetailedERC20.sol";
@@ -8,5 +9,5 @@ contract TestToken is MintableToken, DetailedERC20 {
     string name,
     string symbol,
     uint8 decimals
-  ) DetailedERC20(name, symbol, decimals) {}
+  ) DetailedERC20(name, symbol, decimals) public {}
 }

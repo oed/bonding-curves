@@ -28,7 +28,7 @@ contract PolynomialCurvedToken is BondingCurvedToken {
 
     /// @dev        Calculate the integral from 0 to t
     /// @param t    The number to integrate to
-    function curveIntegral(uint256 t) internal returns (uint256) {
+    function curveIntegral(uint256 t) internal view returns (uint256) {
         uint256 nexp = exponent + 1;
         // Calculate integral of t^exponent
         return PRECISION.div(nexp).mul(t ** nexp).div(PRECISION);
